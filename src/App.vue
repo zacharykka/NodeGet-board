@@ -8,6 +8,7 @@ import { useBackendStore } from "@/composables/useBackendStore";
 import { usePermissionStore } from "@/stores/permission";
 import { getWsConnection } from "@/composables/useWsConnection";
 import { useRouter, useRoute } from "vue-router";
+import RpcDebugPanelDialog from "@/components/rpc-debug-panel/RpcDebugPanelDialog.vue";
 import "@/utils/detectUpdate";
 
 const router = useRouter();
@@ -101,6 +102,7 @@ watch(
       <component :is="Component" />
     </Transition>
   </RouterView>
+  <RpcDebugPanelDialog />
   <Toaster rich-colors close-button theme="system" :duration="3000" />
 </template>
 <style scoped></style>

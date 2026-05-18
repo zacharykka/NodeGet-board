@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
 import { useBackendStore } from "@/composables/useBackendStore";
-import {
-  registerRpcDebugEventHandler,
-  type RpcDebugRecord,
-  useRpcDebugStore,
-} from "./rpcDebugStore";
+import { type RpcDebugRecord, useRpcDebugStore } from "./rpcDebugStore";
 import { rpcDebugTabs } from "./helpers";
 import type { RpcDebugTabKey } from "./types";
 import RpcAuthView from "./components/RpcAuthView.vue";
@@ -20,16 +16,6 @@ const pendingComposerRecord = ref<RpcDebugRecord | null>(null);
 
 const debugStore = useRpcDebugStore();
 const backendStore = useBackendStore();
-
-let unregisterDebugEvents: (() => void) | undefined;
-
-onMounted(() => {
-  unregisterDebugEvents = registerRpcDebugEventHandler();
-});
-
-onBeforeUnmount(() => {
-  unregisterDebugEvents?.();
-});
 
 const connectionLabel = computed(() => {
   const backend = backendStore.currentBackend.value;

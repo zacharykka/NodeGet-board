@@ -84,48 +84,58 @@ function bindRpcDebugCaptureSetting(pinia?: Pinia) {
 
 function replayTrackedConnections(listener: RpcDebugWebSocketListener) {
   for (const connection of trackedConnections.values()) {
-    listener({
+    createTrackedConnectionReplayEvents(connection).forEach(listener);
+  }
+}
+
+function createTrackedConnectionReplayEvents(
+  connection: RpcDebugTrackedWebSocketConnection,
+) {
+  const events: RpcDebugWebSocketEvent[] = [
+    {
       type: "connection",
       state: "connecting",
       connectionId: connection.connectionId,
       url: connection.url,
       timestamp: connection.createdAt,
+    },
+  ];
+
+  if (connection.state === "open") {
+    events.push({
+      type: "connection",
+      state: "open",
+      connectionId: connection.connectionId,
+      url: connection.url,
+      timestamp: connection.openedAt ?? connection.createdAt,
     });
-
-    if (connection.state === "open") {
-      listener({
-        type: "connection",
-        state: "open",
-        connectionId: connection.connectionId,
-        url: connection.url,
-        timestamp: connection.openedAt ?? connection.createdAt,
-      });
-      continue;
-    }
-
-    if (connection.state === "error") {
-      listener({
-        type: "connection",
-        state: "error",
-        connectionId: connection.connectionId,
-        url: connection.url,
-        timestamp: Date.now(),
-      });
-      continue;
-    }
-
-    if (connection.state === "closed") {
-      listener({
-        type: "connection",
-        state: "closed",
-        connectionId: connection.connectionId,
-        url: connection.url,
-        timestamp: connection.closedAt ?? connection.createdAt,
-        closeCode: connection.closeCode,
-        closeReason: connection.closeReason,
-      });
-    }
+    return events;
   }
+
+  if (connection.state === "error") {
+    events.push({
+      type: "connection",
+      state: "error",
+      connectionId: connection.connectionId,
+      url: connection.url,
+      timestamp: Date.now(),
+    });
+    return events;
+  }
+
+  if (connection.state === "closed") {
+    events.push({
+      type: "connection",
+      state: "closed",
+      connectionId: connection.connectionId,
+      url: connection.url,
+      timestamp: connection.closedAt ?? connection.createdAt,
+      closeCode: connection.closeCode,
+      closeReason: connection.closeReason,
+    });
+  }
+
+  return events;
 }
 
 export function installRpcDebugWebSocketPatch(pinia?: Pinia) {
