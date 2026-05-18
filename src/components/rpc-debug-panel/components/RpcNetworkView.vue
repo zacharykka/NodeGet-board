@@ -189,25 +189,27 @@ function relayCopy(text: string, message?: string) {
       </select>
     </div>
 
-    <RpcDebugDataTable
-      class="flex overflow-hidden"
-      :columns="networkColumns"
-      :data="filteredRecords"
-      empty-text="暂无捕获记录。打开本页后新建的 WebSocket 请求会自动进入列表。"
-      :row-key="(record) => record.recordId"
-      :row-class="
-        (record) =>
-          selectedRecord?.recordId === record.recordId ? 'bg-muted/60' : ''
-      "
-      :on-row-click="selectRecord"
-    />
-    <RpcNetworkDrawer
-      class="z-10"
-      v-if="selectedRecord"
-      :record="selectedRecord"
-      @close="closeDrawer"
-      @copy="relayCopy"
-      @edit="emit('editRecord', $event)"
-    />
+    <div class="relative h-full flex overflow-hidden">
+      <RpcDebugDataTable
+        class="h-full w-full flex overflow-hidden"
+        :columns="networkColumns"
+        :data="filteredRecords"
+        empty-text="暂无捕获记录。打开本页后新建的 WebSocket 请求会自动进入列表。"
+        :row-key="(record) => record.recordId"
+        :row-class="
+          (record) =>
+            selectedRecord?.recordId === record.recordId ? 'bg-muted/60' : ''
+        "
+        :on-row-click="selectRecord"
+      />
+      <RpcNetworkDrawer
+        v-if="selectedRecord"
+        class="z-10"
+        :record="selectedRecord"
+        @close="closeDrawer"
+        @copy="relayCopy"
+        @edit="emit('editRecord', $event)"
+      />
+    </div>
   </div>
 </template>
