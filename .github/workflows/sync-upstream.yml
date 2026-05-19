@@ -1,0 +1,46 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # Every 8 hours: 00:00, 08:00, 16:00 UTC
+    - cron: "0 */8 * * *"
+
+  workflow_dispatch:
+    inputs:
+      sync_test_mode:
+        description: "Run in test mode"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Sync latest commits from upstream
+
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.3
+        with:
+          target_sync_branch: main
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_sync_repo: NodeSeekDev/NodeGet-board
+          upstream_sync_branch: main
+          test_mode: ${{ inputs.sync_test_mode || false }}
+
+      - name: Report sync result
+        run: |
+          echo "has_new_commits=${{ steps.sync.outputs.has_new_commits }}"
