@@ -43,6 +43,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import UpstreamFormDialog from "@/components/node/setting/UpstreamDetailDialog.vue";
+import { TASK_NAME_LIST } from "@/types/task";
 
 const props = defineProps<{ uuid: string }>();
 
@@ -134,17 +135,7 @@ const handleSave = async (newUpstream: UpstreamServer) => {
     };
   } else {
     server.push({
-      allow_edit_config: true,
-      allow_execute: true,
-      allow_http_ping: true,
-      allow_http_request: true,
-      allow_self_update: true,
-      allow_icmp_ping: true,
-      allow_ip: true,
-      allow_read_config: true,
-      allow_task: true,
-      allow_tcp_ping: true,
-      allow_web_shell: true,
+      allow_task_type: TASK_NAME_LIST.slice(0),
       ...newUpstream,
     });
   }
@@ -331,6 +322,17 @@ const handleDelete = async (index: number) => {
             />
             <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
+        </div>
+      </div>
+      <!-- ignore_cert -->
+      <div class="flex items-start px-4 py-3 gap-4">
+        <span class="text-sm text-muted-foreground w-28 shrink-0 pt-0.5">
+          忽略TLS错误
+        </span>
+        <div class="flex items-start gap-1.5 min-w-0">
+          <span class="text-sm font-mono break-all">{{
+            upstream.ignore_cert ? "是" : "否"
+          }}</span>
         </div>
       </div>
       <!-- Operation -->
