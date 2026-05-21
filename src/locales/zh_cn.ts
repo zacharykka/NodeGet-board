@@ -190,6 +190,9 @@ export default {
         deleteSuccess: "删除成功",
         deleteFailed: "删除失败",
         detailFailed: "获取Token详情失败",
+        rollSecretSuccess: "Token Secret 重新生成成功",
+        rollSecretFailed: "Token Secret 重新生成失败",
+        rollSecretFailedWithMessage: "Token Secret 重新生成失败：{message}",
       },
       list: {
         title: "Token 管理",
@@ -218,10 +221,17 @@ export default {
         },
         resetDialog: {
           title: "重置 Token",
-          description: "当丢失 Token 时，可使用该功能重新生成 Token。",
-          confirm: "是否确认重置？操作完成后此前的 Token 将失效。",
+          description:
+            "重新生成该 Token 的 Token Secret，旧 Secret 会立即失效。",
+          confirm:
+            "是否确认重新生成？请在成功后立即复制并妥善保存新的 Secret。",
           confirmButton: "重置",
           confirmingButton: "重置中...",
+        },
+        resetSuccessDialog: {
+          title: "Token Secret 重新生成成功",
+          description:
+            "新的 Token Secret 只会显示这一次，请立即复制并妥善保存。旧 Secret 已失效。",
         },
       },
       create: {

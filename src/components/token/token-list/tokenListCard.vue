@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/pagination";
 import { Eye, Pencil, Trash2, RotateCcw, Search } from "lucide-vue-next";
 import { useTokenListHook, type Token } from "@/composables/token/useTokenList";
+import TokenSuccessDialog from "../components/TokenSuccessDialog.vue";
 
 const useTokenList = useTokenListHook();
 const router = useRouter();
@@ -52,6 +54,11 @@ const resetTokenLoading = ref(false);
 // 控制是否显示重置Token结果
 const showResetTokenResult = ref(false);
 const isFirstLoad = ref(true);
+const selectedResetToken = ref<Token | null>(null);
+const rolledTokenInfo = ref({
+  key: "",
+  secret: "",
+});
 
 const emit = defineEmits<{ "first-load-empty": [] }>();
 
@@ -168,10 +175,38 @@ const handleDeleteToken = (deleteToken: Token) => {
 
 // 打开重置Token弹窗
 const handleOpenResetToken = (token: Token) => {
+  selectedResetToken.value = token;
   resetTokenOpen.value = true;
 };
 // 确认重置Token操作
-const handleConfirmResetToken = (token: Token) => {};
+const handleConfirmResetToken = () => {
+  if (!selectedResetToken.value?.token_key) return;
+
+  resetTokenLoading.value = true;
+  useTokenList
+    .rollTokenSecret(selectedResetToken.value.token_key)
+    .then((result) => {
+      if (result.key && result.secret) {
+        rolledTokenInfo.value = {
+          key: result.key,
+          secret: result.secret,
+        };
+        resetTokenOpen.value = false;
+        showResetTokenResult.value = true;
+        handleGetTokenList();
+      }
+    })
+    .finally(() => {
+      resetTokenLoading.value = false;
+    });
+};
+
+watch(resetTokenOpen, (open) => {
+  if (!open) {
+    selectedResetToken.value = null;
+    resetTokenLoading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -364,17 +399,42 @@ const handleConfirmResetToken = (token: Token) => {};
   <!-- 重置 Token 弹窗 -->
   <Dialog v-model:open="resetTokenOpen">
     <DialogContent class="w-400">
-      <DialogTitle>
-        {{ t("dashboard.token.list.resetDialog.title") }}
-      </DialogTitle>
-      <DialogDescription>
-        {{ t("dashboard.token.list.resetDialog.description") }}
-      </DialogDescription>
-      <!-- {{ t('dashboard.token.list.resetDialog.confirm') }} -->
-      开发中......
+      <DialogHeader>
+        <DialogTitle>
+          {{ t("dashboard.token.list.resetDialog.title") }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t("dashboard.token.list.resetDialog.description") }}
+        </DialogDescription>
+      </DialogHeader>
+      <div class="space-y-2 py-2 text-sm">
+        <div class="text-muted-foreground">
+          {{ t("dashboard.token.list.resetDialog.confirm") }}
+        </div>
+        <div class="rounded-md border bg-muted/40 p-3 space-y-1">
+          <div>
+            <span class="text-muted-foreground">
+              {{ t("dashboard.token.list.table.username") }}:
+            </span>
+            <span class="ml-2">
+              {{ selectedResetToken?.username || "-" }}
+            </span>
+          </div>
+          <div>
+            <span class="text-muted-foreground">
+              {{ t("dashboard.token.list.table.tokenKey") }}:
+            </span>
+            <span class="ml-2 font-mono">
+              {{ selectedResetToken?.token_key || "-" }}
+            </span>
+          </div>
+        </div>
+      </div>
       <DialogFooter>
         <DialogClose as-child>
-          <Button variant="outline"> {{ t("dashboard.token.cancel") }} </Button>
+          <Button variant="outline" :disabled="resetTokenLoading">
+            {{ t("dashboard.token.cancel") }}
+          </Button>
         </DialogClose>
         <Button @click="handleConfirmResetToken">
           <div v-if="resetTokenLoading" class="flex items-center">
@@ -389,4 +449,12 @@ const handleConfirmResetToken = (token: Token) => {};
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <TokenSuccessDialog
+    v-model:open="showResetTokenResult"
+    :token-key="rolledTokenInfo.key"
+    :token-secret="rolledTokenInfo.secret"
+    :title="t('dashboard.token.list.resetSuccessDialog.title')"
+    :description="t('dashboard.token.list.resetSuccessDialog.description')"
+  />
 </template>

@@ -181,6 +181,10 @@ export default {
         deleteSuccess: "Deleted successfully",
         deleteFailed: "Deletion failed",
         detailFailed: "Failed to fetch token detail",
+        rollSecretSuccess: "Token secret regenerated successfully",
+        rollSecretFailed: "Failed to regenerate token secret",
+        rollSecretFailedWithMessage:
+          "Failed to regenerate token secret: {message}",
       },
       list: {
         title: "Token Management",
@@ -211,11 +215,16 @@ export default {
         resetDialog: {
           title: "Reset Token",
           description:
-            "If the token is lost, you can regenerate a new one with this action.",
+            "Regenerate this token secret. The previous secret will become invalid immediately.",
           confirm:
-            "Are you sure you want to reset it? The previous token will become invalid after this action.",
+            "Are you sure you want to regenerate it? Copy and store the new secret immediately after success.",
           confirmButton: "Reset",
           confirmingButton: "Resetting...",
+        },
+        resetSuccessDialog: {
+          title: "Token Secret Regenerated",
+          description:
+            "The new token secret will be shown only once. Copy and store it securely now. The previous secret is no longer valid.",
         },
       },
       create: {
