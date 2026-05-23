@@ -48,6 +48,7 @@ import {
   type ServerInfo,
 } from "@/composables/useBackendExtra";
 import { preGenerateToken } from "@/components/agents/generateToken";
+import { Switch } from "@/components/ui/switch";
 
 const props = defineProps<{
   open: boolean;
@@ -92,14 +93,23 @@ watch(
       form.value.ws_url = "";
       form.value.server_uuid = "";
       form.value.token = "";
+      form.value.ignore_cert = false;
       return;
     }
     const target = availableServerInfo.value.find((v) => v.uuid === val);
     form.value.name = target?.name || "";
     form.value.ws_url = target?.agentConfigWsUrl || "";
     form.value.server_uuid = target?.uuid || "";
-    form.value.token =
-      (await preGenerateToken(props.nodeUUID, ref(target as ServerInfo))) || "";
+    form.value.token = props.upstream.token;
+    form.value.ignore_cert = !!props.upstream.ignore_cert;
+
+    // preGenerateToken(props.nodeUUID, ref(target as ServerInfo))
+    //   .then(token => {
+    //     if(token){
+    //       form.value.token = token
+    //     }
+    //   })
+    //   .catch(() => null)
   },
   {
     immediate: true,
@@ -135,6 +145,7 @@ const handleSave = async () => {
     server_uuid: form.value.server_uuid,
     token: form.value.token,
     ws_url: form.value.ws_url,
+    ignore_cert: form.value.ignore_cert,
   });
 };
 
@@ -195,6 +206,10 @@ watch(
         <div class="space-y-1.5">
           <Label>{{ t("dashboard.servers.detail.infoToken") }}</Label>
           <Input v-model="form.token" />
+        </div>
+        <div class="space-y-1.5">
+          <Label>忽略TLS错误</Label>
+          <Switch v-model:model-value="form.ignore_cert" />
         </div>
       </div>
       <DialogFooter>

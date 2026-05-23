@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineComponent, h, type VNode } from "vue";
 import { useRouter } from "vue-router";
-import { marked } from "marked";
+import MarkdownIt from "markdown-it";
 import { Codemirror } from "vue-codemirror";
 import { json } from "@codemirror/lang-json";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -14,11 +14,8 @@ import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { yaml } from "@codemirror/legacy-modes/mode/yaml";
 import { useThemeStore } from "@/stores/theme";
 
-// 渲染 markdown，禁用原生 HTML
-const renderMarkdown = (src: string): string => {
-  const result = marked.parse(src, { async: false, breaks: true });
-  return result as string;
-};
+const md = new MarkdownIt({ html: false, breaks: true });
+const renderMarkdown = (src: string): string => md.render(src);
 import {
   ExternalLink,
   ChevronRight,
@@ -176,6 +173,8 @@ const saveFile = async () => {
       props.extension.id,
       selectedFile.value,
       encoded.buffer as ArrayBuffer,
+      undefined,
+      props.extension.storage,
     );
     fileContent.value = editedContent.value;
     toast.success("已保存");
@@ -198,6 +197,7 @@ const handleFileUpload = async (e: Event) => {
       selectedFile.value,
       content,
       file.type || undefined,
+      props.extension.storage,
     );
     fileContent.value = await new Response(content).text();
     toast.success("已上传");
@@ -356,7 +356,7 @@ const loadFileContent = async (path: string) => {
 
   fileLoading.value = true;
   try {
-    const url = getStaticUrl(props.extension.id, path);
+    const url = getStaticUrl(props.extension.id, path, props.extension.storage);
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
     fileContent.value = await resp.text();

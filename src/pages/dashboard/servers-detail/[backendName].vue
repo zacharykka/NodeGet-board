@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 // import { RadioGroup, RadioGroupItem, } from '@/components/ui/radio-group'
-import { useBackendStore } from "@/composables/useBackendStore";
+import { useBackendStore, normalizeUrl } from "@/composables/useBackendStore";
 import { useBackendExtra } from "@/composables/useBackendExtra";
 import { getWsConnection } from "@/composables/useWsConnection";
 import { useThemeStore } from "@/stores/theme";
@@ -40,15 +40,15 @@ const { serverInfo, saveAgentConfigWsUrl, refreshAll, serverInfoLoading } =
 const themeStore = useThemeStore();
 
 const backend = computed(() => {
-  const raw = (route.params as { backendId: string }).backendId;
-  const sep = raw.indexOf(":::");
-  if (sep === -1) {
-    const token = decodeURIComponent(raw);
-    return backends.value.find((b) => b.token === token) ?? null;
-  }
-  const url = decodeURIComponent(raw.slice(0, sep));
-  const token = decodeURIComponent(raw.slice(sep + 3));
-  return backends.value.find((b) => b.url === url && b.token === token) ?? null;
+  const backendName = (route.params as { backendName: string }).backendName;
+  // const sep = raw.indexOf(":::");
+  // if (sep === -1) {
+  //   const token = decodeURIComponent(raw);
+  //   return backends.value.find((b) => b.token === token) ?? null;
+  // }
+  // const url = decodeURIComponent(raw.slice(0, sep));
+  // const token = decodeURIComponent(raw.slice(sep + 3));
+  return backends.value.find((b) => b.name === backendName) ?? null;
 });
 
 const isActive = computed(
@@ -232,8 +232,11 @@ function saveEdit(field: string) {
 
   if (field === "name") {
     backends.value[idx]!.name = editValue.value;
+    router.replace(
+      `/dashboard/servers-detail/${encodeURIComponent(editValue.value)}`,
+    );
   } else if (field === "url") {
-    backends.value[idx]!.url = editValue.value;
+    backends.value[idx]!.url = normalizeUrl(editValue.value);
   } else if (field === "token") {
     backends.value[idx]!.token = editValue.value;
   }
@@ -287,7 +290,7 @@ function saveEdit(field: string) {
         <TabsTrigger value="config">{{
           t("dashboard.servers.detail.tabConfig")
         }}</TabsTrigger>
-        <TabsTrigger value="version">{{
+        <TabsTrigger value="version" v-if="false">{{
           t("dashboard.servers.detail.tabVersion")
         }}</TabsTrigger>
       </TabsList>
@@ -692,7 +695,7 @@ function saveEdit(field: string) {
       </TabsContent>
 
       <!-- Tab: 版本升级 -->
-      <TabsContent value="version" class="mt-4">
+      <TabsContent value="version" class="mt-4" v-if="false">
         <div
           class="flex flex-col items-center justify-center py-24 gap-4 text-muted-foreground"
         >

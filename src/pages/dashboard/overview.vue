@@ -4,6 +4,8 @@ import { useRouter } from "vue-router";
 import { useOverviewData } from "@/composables/useOverviewData";
 import { colors } from "@/composables/color";
 import { formatLoad, formatBytes, formatUptime } from "@/utils/format";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-vue-next";
 import {
   showHostname,
   showOS,
@@ -14,7 +16,6 @@ import {
   showDiskUsage,
   showDiskPercent,
   showDiskDisplay,
-  isOnline,
   distroLogo,
   virtLabel,
   flagUrl,
@@ -63,7 +64,9 @@ definePage({
 
 const router = useRouter();
 
-const { servers, loading, error, start, stop } = useOverviewData();
+const { servers, loading, error, start, stop, refresh } = useOverviewData();
+
+const inactive = ref(false);
 
 const selectedTag = ref("all");
 
@@ -76,14 +79,20 @@ const allTags = computed(() => {
 });
 
 const filteredServers = computed(() => {
-  if (selectedTag.value === "all") return servers.value;
-  return servers.value.filter((s) =>
-    (s.tags ?? []).includes(selectedTag.value),
-  );
+  const list =
+    selectedTag.value === "all"
+      ? servers.value
+      : servers.value.filter((s) => (s.tags ?? []).includes(selectedTag.value));
+  return [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 });
+
+function isOnline(server: (typeof servers.value)[0]) {
+  return server.online;
+}
 
 onMounted(() => {
   start();
+  // attachVisibilityListener()
 });
 
 onUnmounted(() => {
@@ -96,6 +105,24 @@ const goToServerDetail = (uuid: string) => {
     params: { uuid },
   });
 };
+
+// let visibilityListenerAttached = false
+// function attachVisibilityListener(onVisible = () => undefined) {
+//   if (visibilityListenerAttached || typeof document === "undefined") {
+//     return;
+//   }
+
+//   visibilityListenerAttached = true;
+//   document.addEventListener("visibilitychange", () => {
+
+//     if (document.visibilityState === "hidden") {
+//       inactive.value = true;
+//     } else {
+//       inactive.value = false;
+//       onVisible();
+//     }
+//   });
+// }
 </script>
 
 <template>
@@ -107,6 +134,14 @@ const goToServerDetail = (uuid: string) => {
           Manage and monitor your servers in a list layout.
         </p>
       </div>
+      <Button
+        class="ml-auto"
+        variant="outline"
+        size="sm"
+        @click="() => refresh()"
+      >
+        <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
+      </Button>
       <div v-if="allTags.length > 0" class="w-40 shrink-0">
         <Select v-model="selectedTag">
           <SelectTrigger class="w-full">
@@ -180,12 +215,20 @@ const goToServerDetail = (uuid: string) => {
             <TableCell>
               <div class="flex items-center justify-center">
                 <span
-                  :title="isOnline(server) ? 'Online' : 'Offline'"
+                  :title="
+                    inactive
+                      ? 'Inactive'
+                      : isOnline(server)
+                        ? 'Online'
+                        : 'Offline'
+                  "
                   class="inline-block w-2 h-2 rounded-full shrink-0"
                   :class="
-                    isOnline(server)
-                      ? 'bg-emerald-500 ring-2 ring-emerald-500/25'
-                      : 'bg-rose-500 ring-2 ring-rose-500/25'
+                    inactive
+                      ? 'bg-gray-400 ring-2 ring-gray-400/25'
+                      : isOnline(server)
+                        ? 'bg-emerald-500 ring-2 ring-emerald-500/25'
+                        : 'bg-rose-500 ring-2 ring-rose-500/25'
                   "
                 />
               </div>

@@ -1,6 +1,7 @@
 import type { ScopeTabValue } from "./scopeUi";
 import type { PermissionEntry, TokenLimitEntry, TokenLimitScope } from "./type";
 import { DEFAULT_SCOPE } from "./scopeCodec";
+import { TASK_NAME_LIST } from "@/types/task";
 
 export type TokenPermissionTemplateValue = "agent" | "visitor" | "custom";
 
@@ -28,38 +29,38 @@ export const AGENT_PERMISSIONS: PermissionEntry[] = [
   { dynamic_monitoring: "write" },
   { dynamic_monitoring_summary: "write" },
   { task: "listen" },
-  { task: { write: "ping" } },
-  { task: { write: "tcp_ping" } },
-  { task: { write: "http_ping" } },
-  { task: { write: "web_shell" } },
-  { task: { write: "execute" } },
-  { task: { write: "edit_config" } },
-  { task: { write: "read_config" } },
-  { task: { write: "http_request" } },
-  { task: { write: "ip" } },
+  ...TASK_NAME_LIST.map((t) => ({
+    task: { write: t },
+  })),
 ];
 
 export const VISITOR_PERMISSIONS: PermissionEntry[] = [
   { static_monitoring: { read: "cpu" } },
   { static_monitoring: { read: "system" } },
   { static_monitoring: { read: "gpu" } },
-  //   { static_monitoring: "write" },
-  //   { static_monitoring: "delete" },
-  { dynamic_monitoring: { read: "cpu" } },
-  { dynamic_monitoring: { read: "ram" } },
-  { dynamic_monitoring: { read: "load" } },
-  { dynamic_monitoring: { read: "system" } },
-  { dynamic_monitoring: { read: "disk" } },
-  { dynamic_monitoring: { read: "network" } },
-  { dynamic_monitoring: { read: "gpu" } },
-  //   { dynamic_monitoring: "write" },
-  //   { dynamic_monitoring: "delete" },
+  // { dynamic_monitoring: { read: "cpu" } },
+  // { dynamic_monitoring: { read: "ram" } },
+  // { dynamic_monitoring: { read: "load" } },
+  // { dynamic_monitoring: { read: "system" } },
+  // { dynamic_monitoring: { read: "disk" } },
+  // { dynamic_monitoring: { read: "network" } },
+  // { dynamic_monitoring: { read: "gpu" } },
   { dynamic_monitoring_summary: "read" },
+  {
+    node_get: "list_all_agent_uuid",
+  },
   {
     kv: {
       read: "metadata_*",
     },
   },
+];
+
+export const VISITOR_WITH_PING_PERMISSIONS: PermissionEntry[] = [
+  ...VISITOR_PERMISSIONS,
+  { task: { write: "ping" } },
+  { task: { write: "tcp_ping" } },
+  { task: { write: "http_ping" } },
 ];
 
 const normalizePermissionValue = (value: unknown): string => {

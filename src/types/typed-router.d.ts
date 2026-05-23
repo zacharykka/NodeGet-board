@@ -37,16 +37,12 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | '/dashboard/about'
       | '/dashboard/agents'
-      | '/dashboard/app'
       | '/dashboard/app-panel'
       | '/dashboard/app-panel/[id]'
       | '/dashboard/app-panel/list'
       | '/dashboard/app/[extensionRoute]'
-      | '/dashboard/app/docker'
-      | '/dashboard/app/files'
-      | '/dashboard/app/firewall'
-      | '/dashboard/app/process'
       | '/dashboard/batch-exec'
+      | '/dashboard/bucket/[name]'
       | '/dashboard/cost'
       | '/dashboard/cron'
       | '/dashboard/cron-history/[cronName]'
@@ -59,24 +55,23 @@ declare module 'vue-router/auto-routes' {
       | '/dashboard/node/[uuid]'
       | '/dashboard/node/[uuid]/LatencyView'
       | '/dashboard/node/[uuid]/[extensionRoute]'
-      | '/dashboard/node/[uuid]/docker'
       | '/dashboard/node/[uuid]/files'
-      | '/dashboard/node/[uuid]/firewall'
       | '/dashboard/node/[uuid]/latency'
       | '/dashboard/node/[uuid]/ping'
-      | '/dashboard/node/[uuid]/process'
       | '/dashboard/node/[uuid]/setting'
       | '/dashboard/node/[uuid]/status'
       | '/dashboard/node/[uuid]/traffic'
-      | '/dashboard/node/[uuid]/update'
       | '/dashboard/node/[uuid]/webshell'
       | '/dashboard/overview'
       | '/dashboard/scripts'
       | '/dashboard/servers'
-      | '/dashboard/servers-detail/[backendId]'
+      | '/dashboard/servers-detail/[backendName]'
       | '/dashboard/settings'
       | '/dashboard/settings/general'
       | '/dashboard/settings/site'
+      | '/dashboard/static-bucket'
+      | '/dashboard/theme-management'
+      | '/dashboard/theme/[name]'
       | '/dashboard/token'
       | '/dashboard/tokenCeate'
       | '/dashboard/tokenDetail'
@@ -98,50 +93,11 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/dashboard/app': RouteRecordInfo<
-      '/dashboard/app',
-      '/dashboard/app',
-      Record<never, never>,
-      Record<never, never>,
-      | '/dashboard/app/[extensionRoute]'
-      | '/dashboard/app/docker'
-      | '/dashboard/app/files'
-      | '/dashboard/app/firewall'
-      | '/dashboard/app/process'
-    >,
     '/dashboard/app/[extensionRoute]': RouteRecordInfo<
       '/dashboard/app/[extensionRoute]',
       '/dashboard/app/:extensionRoute',
       { extensionRoute: ParamValue<true> },
       { extensionRoute: ParamValue<false> },
-      | never
-    >,
-    '/dashboard/app/docker': RouteRecordInfo<
-      '/dashboard/app/docker',
-      '/dashboard/app/docker',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/dashboard/app/files': RouteRecordInfo<
-      '/dashboard/app/files',
-      '/dashboard/app/files',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/dashboard/app/firewall': RouteRecordInfo<
-      '/dashboard/app/firewall',
-      '/dashboard/app/firewall',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/dashboard/app/process': RouteRecordInfo<
-      '/dashboard/app/process',
-      '/dashboard/app/process',
-      Record<never, never>,
-      Record<never, never>,
       | never
     >,
     '/dashboard/app-panel': RouteRecordInfo<
@@ -171,6 +127,13 @@ declare module 'vue-router/auto-routes' {
       '/dashboard/batch-exec',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/dashboard/bucket/[name]': RouteRecordInfo<
+      '/dashboard/bucket/[name]',
+      '/dashboard/bucket/:name',
+      { name: ParamValue<true> },
+      { name: ParamValue<false> },
       | never
     >,
     '/dashboard/cost': RouteRecordInfo<
@@ -236,16 +199,12 @@ declare module 'vue-router/auto-routes' {
       { uuid: ParamValue<false> },
       | '/dashboard/node/[uuid]/LatencyView'
       | '/dashboard/node/[uuid]/[extensionRoute]'
-      | '/dashboard/node/[uuid]/docker'
       | '/dashboard/node/[uuid]/files'
-      | '/dashboard/node/[uuid]/firewall'
       | '/dashboard/node/[uuid]/latency'
       | '/dashboard/node/[uuid]/ping'
-      | '/dashboard/node/[uuid]/process'
       | '/dashboard/node/[uuid]/setting'
       | '/dashboard/node/[uuid]/status'
       | '/dashboard/node/[uuid]/traffic'
-      | '/dashboard/node/[uuid]/update'
       | '/dashboard/node/[uuid]/webshell'
     >,
     '/dashboard/node/[uuid]/[extensionRoute]': RouteRecordInfo<
@@ -255,23 +214,9 @@ declare module 'vue-router/auto-routes' {
       { uuid: ParamValue<false>, extensionRoute: ParamValue<false> },
       | never
     >,
-    '/dashboard/node/[uuid]/docker': RouteRecordInfo<
-      '/dashboard/node/[uuid]/docker',
-      '/dashboard/node/:uuid/docker',
-      { uuid: ParamValue<true> },
-      { uuid: ParamValue<false> },
-      | never
-    >,
     '/dashboard/node/[uuid]/files': RouteRecordInfo<
       '/dashboard/node/[uuid]/files',
       '/dashboard/node/:uuid/files',
-      { uuid: ParamValue<true> },
-      { uuid: ParamValue<false> },
-      | never
-    >,
-    '/dashboard/node/[uuid]/firewall': RouteRecordInfo<
-      '/dashboard/node/[uuid]/firewall',
-      '/dashboard/node/:uuid/firewall',
       { uuid: ParamValue<true> },
       { uuid: ParamValue<false> },
       | never
@@ -297,13 +242,6 @@ declare module 'vue-router/auto-routes' {
       { uuid: ParamValue<false> },
       | never
     >,
-    '/dashboard/node/[uuid]/process': RouteRecordInfo<
-      '/dashboard/node/[uuid]/process',
-      '/dashboard/node/:uuid/process',
-      { uuid: ParamValue<true> },
-      { uuid: ParamValue<false> },
-      | never
-    >,
     '/dashboard/node/[uuid]/setting': RouteRecordInfo<
       '/dashboard/node/[uuid]/setting',
       '/dashboard/node/:uuid/setting',
@@ -321,13 +259,6 @@ declare module 'vue-router/auto-routes' {
     '/dashboard/node/[uuid]/traffic': RouteRecordInfo<
       '/dashboard/node/[uuid]/traffic',
       '/dashboard/node/:uuid/traffic',
-      { uuid: ParamValue<true> },
-      { uuid: ParamValue<false> },
-      | never
-    >,
-    '/dashboard/node/[uuid]/update': RouteRecordInfo<
-      '/dashboard/node/[uuid]/update',
-      '/dashboard/node/:uuid/update',
       { uuid: ParamValue<true> },
       { uuid: ParamValue<false> },
       | never
@@ -367,11 +298,11 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/dashboard/servers-detail/[backendId]': RouteRecordInfo<
-      '/dashboard/servers-detail/[backendId]',
-      '/dashboard/servers-detail/:backendId',
-      { backendId: ParamValue<true> },
-      { backendId: ParamValue<false> },
+    '/dashboard/servers-detail/[backendName]': RouteRecordInfo<
+      '/dashboard/servers-detail/[backendName]',
+      '/dashboard/servers-detail/:backendName',
+      { backendName: ParamValue<true> },
+      { backendName: ParamValue<false> },
       | never
     >,
     '/dashboard/settings': RouteRecordInfo<
@@ -392,6 +323,27 @@ declare module 'vue-router/auto-routes' {
     '/dashboard/settings/site': RouteRecordInfo<
       '/dashboard/settings/site',
       '/dashboard/settings/site',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/dashboard/static-bucket': RouteRecordInfo<
+      '/dashboard/static-bucket',
+      '/dashboard/static-bucket',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/dashboard/theme/[name]': RouteRecordInfo<
+      '/dashboard/theme/[name]',
+      '/dashboard/theme/:name',
+      { name: ParamValue<true> },
+      { name: ParamValue<false> },
+      | never
+    >,
+    '/dashboard/theme-management': RouteRecordInfo<
+      '/dashboard/theme-management',
+      '/dashboard/theme-management',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -438,6 +390,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/index.deprecated': RouteRecordInfo<
+      '/index.deprecated',
+      '/index/deprecated',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/server-detail': RouteRecordInfo<
       '/server-detail',
       '/s/:uuid',
@@ -469,16 +428,12 @@ declare module 'vue-router/auto-routes' {
         | '/dashboard'
         | '/dashboard/about'
         | '/dashboard/agents'
-        | '/dashboard/app'
         | '/dashboard/app-panel'
         | '/dashboard/app-panel/[id]'
         | '/dashboard/app-panel/list'
         | '/dashboard/app/[extensionRoute]'
-        | '/dashboard/app/docker'
-        | '/dashboard/app/files'
-        | '/dashboard/app/firewall'
-        | '/dashboard/app/process'
         | '/dashboard/batch-exec'
+        | '/dashboard/bucket/[name]'
         | '/dashboard/cost'
         | '/dashboard/cron'
         | '/dashboard/cron-history/[cronName]'
@@ -491,24 +446,23 @@ declare module 'vue-router/auto-routes' {
         | '/dashboard/node/[uuid]'
         | '/dashboard/node/[uuid]/LatencyView'
         | '/dashboard/node/[uuid]/[extensionRoute]'
-        | '/dashboard/node/[uuid]/docker'
         | '/dashboard/node/[uuid]/files'
-        | '/dashboard/node/[uuid]/firewall'
         | '/dashboard/node/[uuid]/latency'
         | '/dashboard/node/[uuid]/ping'
-        | '/dashboard/node/[uuid]/process'
         | '/dashboard/node/[uuid]/setting'
         | '/dashboard/node/[uuid]/status'
         | '/dashboard/node/[uuid]/traffic'
-        | '/dashboard/node/[uuid]/update'
         | '/dashboard/node/[uuid]/webshell'
         | '/dashboard/overview'
         | '/dashboard/scripts'
         | '/dashboard/servers'
-        | '/dashboard/servers-detail/[backendId]'
+        | '/dashboard/servers-detail/[backendName]'
         | '/dashboard/settings'
         | '/dashboard/settings/general'
         | '/dashboard/settings/site'
+        | '/dashboard/static-bucket'
+        | '/dashboard/theme-management'
+        | '/dashboard/theme/[name]'
         | '/dashboard/token'
         | '/dashboard/tokenCeate'
         | '/dashboard/tokenDetail'
@@ -530,44 +484,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/dashboard/app.vue': {
-      routes:
-        | '/dashboard/app'
-        | '/dashboard/app/[extensionRoute]'
-        | '/dashboard/app/docker'
-        | '/dashboard/app/files'
-        | '/dashboard/app/firewall'
-        | '/dashboard/app/process'
-      views:
-        | 'default'
-    }
     'src/pages/dashboard/app/[extensionRoute].vue': {
       routes:
         | '/dashboard/app/[extensionRoute]'
-      views:
-        | never
-    }
-    'src/pages/dashboard/app/docker.vue': {
-      routes:
-        | '/dashboard/app/docker'
-      views:
-        | never
-    }
-    'src/pages/dashboard/app/files.vue': {
-      routes:
-        | '/dashboard/app/files'
-      views:
-        | never
-    }
-    'src/pages/dashboard/app/firewall.vue': {
-      routes:
-        | '/dashboard/app/firewall'
-      views:
-        | never
-    }
-    'src/pages/dashboard/app/process.vue': {
-      routes:
-        | '/dashboard/app/process'
       views:
         | never
     }
@@ -594,6 +513,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/dashboard/batch-exec.vue': {
       routes:
         | '/dashboard/batch-exec'
+      views:
+        | never
+    }
+    'src/pages/dashboard/bucket/[name].vue': {
+      routes:
+        | '/dashboard/bucket/[name]'
       views:
         | never
     }
@@ -651,16 +576,12 @@ declare module 'vue-router/auto-routes' {
         | '/dashboard/node/[uuid]'
         | '/dashboard/node/[uuid]/LatencyView'
         | '/dashboard/node/[uuid]/[extensionRoute]'
-        | '/dashboard/node/[uuid]/docker'
         | '/dashboard/node/[uuid]/files'
-        | '/dashboard/node/[uuid]/firewall'
         | '/dashboard/node/[uuid]/latency'
         | '/dashboard/node/[uuid]/ping'
-        | '/dashboard/node/[uuid]/process'
         | '/dashboard/node/[uuid]/setting'
         | '/dashboard/node/[uuid]/status'
         | '/dashboard/node/[uuid]/traffic'
-        | '/dashboard/node/[uuid]/update'
         | '/dashboard/node/[uuid]/webshell'
       views:
         | 'default'
@@ -671,21 +592,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/dashboard/node/[uuid]/docker.vue': {
-      routes:
-        | '/dashboard/node/[uuid]/docker'
-      views:
-        | never
-    }
     'src/pages/dashboard/node/[uuid]/files.vue': {
       routes:
         | '/dashboard/node/[uuid]/files'
-      views:
-        | never
-    }
-    'src/pages/dashboard/node/[uuid]/firewall.vue': {
-      routes:
-        | '/dashboard/node/[uuid]/firewall'
       views:
         | never
     }
@@ -707,12 +616,6 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/dashboard/node/[uuid]/process.vue': {
-      routes:
-        | '/dashboard/node/[uuid]/process'
-      views:
-        | never
-    }
     'src/pages/dashboard/node/[uuid]/setting.vue': {
       routes:
         | '/dashboard/node/[uuid]/setting'
@@ -728,12 +631,6 @@ declare module 'vue-router/auto-routes' {
     'src/pages/dashboard/node/[uuid]/traffic.vue': {
       routes:
         | '/dashboard/node/[uuid]/traffic'
-      views:
-        | never
-    }
-    'src/pages/dashboard/node/[uuid]/update.vue': {
-      routes:
-        | '/dashboard/node/[uuid]/update'
       views:
         | never
     }
@@ -767,9 +664,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/dashboard/servers-detail/[backendId].vue': {
+    'src/pages/dashboard/servers-detail/[backendName].vue': {
       routes:
-        | '/dashboard/servers-detail/[backendId]'
+        | '/dashboard/servers-detail/[backendName]'
       views:
         | never
     }
@@ -790,6 +687,24 @@ declare module 'vue-router/auto-routes' {
     'src/pages/dashboard/settings/site.vue': {
       routes:
         | '/dashboard/settings/site'
+      views:
+        | never
+    }
+    'src/pages/dashboard/static-bucket.vue': {
+      routes:
+        | '/dashboard/static-bucket'
+      views:
+        | never
+    }
+    'src/pages/dashboard/theme/[name].vue': {
+      routes:
+        | '/dashboard/theme/[name]'
+      views:
+        | never
+    }
+    'src/pages/dashboard/theme-management.vue': {
+      routes:
+        | '/dashboard/theme-management'
       views:
         | never
     }
@@ -826,6 +741,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/dashboard/worker-route-preview.vue': {
       routes:
         | '/dashboard/worker-route-preview'
+      views:
+        | never
+    }
+    'src/pages/index.deprecated.vue': {
+      routes:
+        | '/index.deprecated'
       views:
         | never
     }

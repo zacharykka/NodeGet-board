@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBackendStore, type Backend } from "@/composables/useBackendStore";
-import { Plus, Trash2, Loader2 } from "lucide-vue-next";
+import { Plus, Trash2, Loader2, Route } from "lucide-vue-next";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useI18n } from "vue-i18n";
 import { useLifecycle } from "@/composables/useLifecycle";
 import { delay } from "@/lib/delay";
 import { useBackendExtra } from "@/composables/useBackendExtra";
+import { useRouter } from "vue-router";
+import mockInput from "@/components/misc/mockInput.vue";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 const props = withDefaults(
   defineProps<{
@@ -46,6 +55,7 @@ const emit = defineEmits<{
 
 const { afterServerCreate } = useLifecycle();
 const { t } = useI18n();
+const router = useRouter();
 
 const isOpen = computed({
   get: () => props.open,
@@ -57,14 +67,71 @@ const { backends, currentBackend, addBackend, removeBackend, selectBackend } =
 const { serverInfo, refreshAll } = useBackendExtra();
 
 const newName = ref(props.initForm.newName);
-const newUrl = ref(props.initForm.newUrl);
 const newToken = ref(props.initForm.newToken);
+const newProtocol = ref("wss:");
+const newHost = ref("");
+const newPathname = ref("/nodeget/rpc");
 const isLoading = ref(false);
+
+const protocolList = location.protocol === "https:" ? ["wss"] : ["wss", "ws"];
+
+const newUrl = computed(() => {
+  if (!newHost.value) return "";
+  try {
+    const host = parseHost(newHost.value);
+    if (!host) return "";
+    return `${newProtocol.value}//${host}${newPathname.value}`;
+  } catch {
+    return "";
+  }
+});
+
+/**
+ * 解析输入字符串，返回 host:port
+ * @param {string} input - 可能是域名、URL、带端口的字符串
+ * @returns {string} - 返回 host 或 host:port
+ */
+function parseHost(input: string) {
+  if (!input || typeof input !== "string") {
+    throw new Error("Input must be a non-empty string");
+  }
+
+  // 如果没有协议，临时加上
+  let url;
+  try {
+    url = new URL(input);
+  } catch (e) {
+    try {
+      url = new URL(`http://${input}`);
+    } catch (err) {
+      throw new Error(`Invalid URL or host: ${input}`);
+    }
+  }
+
+  // URL.host 包含端口号，如果有的话
+  return url.host;
+}
+
+function normalizeHost() {
+  if (!newHost.value) return;
+  nextTick(() => {
+    const host = parseHost(newHost.value);
+    if (host !== newHost.value) {
+      newHost.value = host;
+    }
+  });
+}
 
 const resetForm = () => {
   newName.value = props.initForm.newName;
-  newUrl.value = props.initForm.newUrl;
   newToken.value = props.initForm.newToken;
+  if (props.initForm.newUrl) {
+    const url = new URL(props.initForm.newUrl);
+    newProtocol.value = url.protocol;
+    newHost.value = url.host;
+    // newPort.value = /^(\d+)$/.test(url.port) ? parseInt(url.port) : 2211;
+    newPathname.value = url.pathname;
+  }
 };
 
 const handleAdd = async () => {
@@ -78,6 +145,8 @@ const handleAdd = async () => {
       url: newUrl.value,
       token: newToken.value,
     };
+    await afterServerCreate(backend);
+
     addBackend(backend);
     // todo: 等待上线🤔
     const maxTrial = 10;
@@ -93,12 +162,18 @@ const handleAdd = async () => {
         console.error(error);
       }
     }
-    await afterServerCreate(backend);
     resetForm();
     if (props.showList === false) isOpen.value = false;
 
     isLoading.value = false;
     // 防止出现有未预料到的未更新的内存变量
+    router.replace({
+      name: "/dashboard/node-manage",
+      query: {
+        tab: "servers",
+      },
+    });
+    await delay(100);
     location.reload();
   } catch (e) {
     console.error("Failed to add backend:", e);
@@ -213,11 +288,42 @@ watch(
               <Input id="name" v-model="newName" placeholder="My Server" />
             </div>
             <div class="space-y-2">
-              <Label for="url">{{ t("dashboard.servers.fieldUrl") }}</Label>
+              <Label for="host">{{ t("dashboard.servers.fieldHost") }}</Label>
               <Input
-                id="url"
-                v-model="newUrl"
-                placeholder="ws://example.com:3000"
+                id="host"
+                v-model="newHost"
+                @blur="normalizeHost()"
+                placeholder="example.com"
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <Label for="protocol">{{
+                t("dashboard.servers.fieldProtocol")
+              }}</Label>
+              <!-- <Input id="protocol" v-model="newProtocol" placeholder="wss" /> -->
+              <Select v-model="newProtocol">
+                <SelectTrigger class="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="item in protocolList"
+                    :value="item + ':'"
+                    >{{ item }}</SelectItem
+                  >
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="space-y-2">
+              <Label for="pathname">{{
+                t("dashboard.servers.fieldPathname")
+              }}</Label>
+              <Input
+                id="pathname"
+                v-model="newPathname"
+                placeholder="/nodeget/rpc"
               />
             </div>
           </div>
@@ -229,6 +335,13 @@ watch(
               type="password"
               placeholder="key:secret username|password"
             />
+            <!-- todo: xss check, not enabled now -->
+            <!-- <mockInput
+              id="token"
+              v-model="newToken"
+              type="password"
+              placeholder="key:secret username|password"
+            /> -->
           </div>
           <RainbowButton
             v-if="(newName && newUrl && newToken) || isLoading"
@@ -239,7 +352,7 @@ watch(
             <Plus v-else class="h-4 w-4 mr-2" />
             {{
               isLoading
-                ? t("dashboard.common.loading")
+                ? t("dashboard.servers.addServerLoading")
                 : t("dashboard.servers.addServer")
             }}
           </RainbowButton>

@@ -117,42 +117,42 @@ const nodeRoutes = computed<SidebarRoute[]>(() => {
         icon: HardDrive,
       },
     },
-    {
-      path: `/dashboard/node/${nodeUuid.value}/docker`,
-      name: "/dashboard/node/[uuid]/docker",
-      params: { uuid: nodeUuid.value },
-      meta: {
-        title: "router.node.docker",
-        icon: Package,
-      },
-    },
-    {
-      path: `/dashboard/node/${nodeUuid.value}/firewall`,
-      name: "/dashboard/node/[uuid]/firewall",
-      params: { uuid: nodeUuid.value },
-      meta: {
-        title: "router.node.firewall",
-        icon: BrickWallFire,
-      },
-    },
-    {
-      path: `/dashboard/node/${nodeUuid.value}/process`,
-      name: "/dashboard/node/[uuid]/process",
-      params: { uuid: nodeUuid.value },
-      meta: {
-        title: "router.node.process",
-        icon: ChartNoAxesGantt,
-      },
-    },
-    {
-      path: `/dashboard/node/${nodeUuid.value}/update`,
-      name: "/dashboard/node/[uuid]/update",
-      params: { uuid: nodeUuid.value },
-      meta: {
-        title: "router.node.update",
-        icon: CloudDownload,
-      },
-    },
+    // {
+    //   path: `/dashboard/node/${nodeUuid.value}/docker`,
+    //   name: "/dashboard/node/[uuid]/docker",
+    //   params: { uuid: nodeUuid.value },
+    //   meta: {
+    //     title: "router.node.docker",
+    //     icon: Package,
+    //   },
+    // },
+    // {
+    //   path: `/dashboard/node/${nodeUuid.value}/firewall`,
+    //   name: "/dashboard/node/[uuid]/firewall",
+    //   params: { uuid: nodeUuid.value },
+    //   meta: {
+    //     title: "router.node.firewall",
+    //     icon: BrickWallFire,
+    //   },
+    // },
+    // {
+    //   path: `/dashboard/node/${nodeUuid.value}/process`,
+    //   name: "/dashboard/node/[uuid]/process",
+    //   params: { uuid: nodeUuid.value },
+    //   meta: {
+    //     title: "router.node.process",
+    //     icon: ChartNoAxesGantt,
+    //   },
+    // },
+    // {
+    //   path: `/dashboard/node/${nodeUuid.value}/update`,
+    //   name: "/dashboard/node/[uuid]/update",
+    //   params: { uuid: nodeUuid.value },
+    //   meta: {
+    //     title: "router.node.update",
+    //     icon: CloudDownload,
+    //   },
+    // },
     {
       path: `/dashboard/node/${nodeUuid.value}/setting`,
       name: "/dashboard/node/[uuid]/setting",
@@ -205,7 +205,7 @@ const extensionGlobalRoutes = computed<SidebarRoute[]>(() =>
           meta: {
             title: r.name,
             icon: ext.app.icon
-              ? getStaticUrl(ext.id, ext.app.icon)
+              ? getStaticUrl(ext.id, ext.app.icon, ext.storage)
               : LayoutGrid,
             order: 100,
           },
@@ -226,7 +226,7 @@ const extensionNodeRoutes = computed<SidebarRoute[]>(() => {
           meta: {
             title: r.name,
             icon: ext.app.icon
-              ? getStaticUrl(ext.id, ext.app.icon)
+              ? getStaticUrl(ext.id, ext.app.icon, ext.storage)
               : LayoutGrid,
           },
         })),

@@ -173,12 +173,21 @@ export default {
       api: {
         createSuccess: "Token created successfully",
         createFailed: "Failed to create token",
+        createFailedWithMessage: "Failed to create token: {message}",
         updateSuccess: "Token updated successfully",
         updateFailed: "Failed to update token",
+        updateFailedWithMessage: "Failed to update token: {message}",
         listFailed: "Failed to fetch token list",
         deleteSuccess: "Deleted successfully",
         deleteFailed: "Deletion failed",
         detailFailed: "Failed to fetch token detail",
+        rollSecretSuccess: "Token secret regenerated successfully",
+        rollSecretFailed: "Failed to regenerate token secret",
+        rollSecretFailedWithMessage:
+          "Failed to regenerate token secret: {message}",
+        changePasswordSuccess: "Password changed successfully",
+        changePasswordFailed: "Failed to change password",
+        changePasswordFailedWithMessage: "Failed to change password: {message}",
       },
       list: {
         title: "Token Management",
@@ -209,17 +218,57 @@ export default {
         resetDialog: {
           title: "Reset Token",
           description:
-            "If the token is lost, you can regenerate a new one with this action.",
+            "Regenerate this token secret. The previous secret will become invalid immediately.",
           confirm:
-            "Are you sure you want to reset it? The previous token will become invalid after this action.",
+            "Are you sure you want to regenerate it? Copy and store the new secret immediately after success.",
           confirmButton: "Reset",
           confirmingButton: "Resetting...",
+        },
+        resetSuccessDialog: {
+          title: "Token Secret Regenerated",
+          description:
+            "The new token secret will be shown only once. Copy and store it securely now. The previous secret is no longer valid.",
+        },
+        changePasswordDialog: {
+          title: "Change Password",
+          description:
+            "Change the login password for the user linked to this token.",
+          disabledTip:
+            "This token has no username, so its password cannot be changed",
+          newPassword: "Enter new password",
+          confirmPassword: "Enter new password again",
+          confirmButton: "Change Password",
+          confirmingButton: "Changing...",
+          errors: {
+            required: "Enter a new password",
+            tooShort: "Password must be at least 6 characters",
+            mismatch: "Passwords do not match",
+          },
         },
       },
       create: {
         title: "Create Token",
         description: "Create a new API token.",
         returnButtonDescription: "Return to token list",
+        mode: {
+          title: "Choose how to create this token",
+          description:
+            "Start from a preset template or open the editor with a blank token.",
+          backToSelect: "Back to create options",
+        },
+        custom: {
+          title: "Custom Token",
+          description:
+            "Manually configure scopes and permissions from scratch.",
+          hint: "Open the shared editor with a blank token configuration.",
+          action: "Create Custom Token",
+        },
+        templates: {
+          title: "Token Templates",
+          description:
+            "Start from a preset configuration, then fine-tune it in the shared editor.",
+          useTemplate: "Use Template",
+        },
         createTokenCard: {
           title: "Create Token",
           createButton: "Create Token",
@@ -304,13 +353,11 @@ export default {
           startTime: "Start Time",
           endTime: "End Time",
           permissionsTitle: "Permission {index}",
-          templateLabel: "Template: {template}",
           permissionsCount: "Permissions: {count}",
           scope: "Scope",
           rawJsonTitle: "Raw JSON",
           notSet: "Not set",
           unknownScope: "Unknown scope",
-          customTemplate: "Custom",
           globalScope: "Global",
           agentScope: "Agent: {value}",
           kvScope: "Kv: {value}",
@@ -342,6 +389,8 @@ export default {
       },
       previeJSON: {
         title: "Format JSON Preview",
+        invalidJson: "Invalid JSON: {message}",
+        invalidField: "Ignored invalid field: {field}",
       },
       permissionsConfig: {
         title: "Token Permissions Config",
@@ -355,21 +404,6 @@ export default {
             "The current permission configuration cannot be restored after deletion.",
           deleteCancel: "Cancel",
           deleteConfirm: "Delete",
-          template: {
-            title: "Permission Template",
-            agent: {
-              title: "Agent",
-              description: "Preset templates tailored for Agent use cases.",
-            },
-            visitor: {
-              title: "Visitor",
-              description: "Preset templates designed for visitors.",
-            },
-            custom: {
-              title: "Custom",
-              description: "Manually configure scopes and permissions.",
-            },
-          },
           scope: {
             title: "Scope",
             global: "Global",
@@ -453,6 +487,18 @@ export default {
           },
         },
       },
+      templates: {
+        agent: {
+          title: "Agent Default",
+          description:
+            "Preset write-oriented permissions for common agent operations.",
+        },
+        visitor: {
+          title: "Visitor Readonly",
+          description:
+            "Preset read-oriented permissions for basic monitoring visibility.",
+        },
+      },
     },
     extensions: {
       title: "Extensions",
@@ -481,6 +527,7 @@ export default {
       normalView: "Normal View",
       flatView: "Flat View",
       nodeView: "Node View",
+      onlyAgents: "Only agent namespaces",
       back: "Back",
       namespace: "Namespace",
       allKeys: "All Keys ({count})",
@@ -545,9 +592,11 @@ export default {
         featureTcpPing: "tcp_ping",
         featureHttpPing: "http_ping",
         featureHttpRequest: "http_request",
+        featureSelfUpdate: "Self Update",
         featureWebShell: "web_shell",
         featureExecute: "execute",
         featureIp: "IP Info",
+        featureVersion: "Version Info",
         featureReadConfig: "read_config",
         featureEditConfig: "edit_config",
         featureEditConfigConfirmTitle: "Disable config editing?",
@@ -589,6 +638,7 @@ export default {
       title: "Controllers",
       desc: "Manage and switch between NodeGet server backends.",
       addServer: "Add Server",
+      addServerLoading: "Add Server and init it, please wait",
       colName: "Name",
       colId: "ID",
       colEndpoint: "API Endpoint",
@@ -600,12 +650,20 @@ export default {
       noServers: 'No servers added. Click "Add Server" to get started.',
       addServerDesc: "Fill in the connection details to add a new backend.",
       fieldName: "Name",
-      fieldUrl: "WS URL",
+      fieldUrl: "WSS URL",
+      fieldHost: "Host",
+      fieldPort: "Port",
+      fieldProtocol: "Protocol",
+      fieldPathname: "Pathname",
       fieldToken: "Token",
       deleteConfirmTitle: "Remove Server",
       deleteConfirmDesc: "Are you sure you want to remove this server?",
       deleteConfirm: "Remove",
       deleteCancel: "Cancel",
+      refreshConfirmTitle: "Refresh Server",
+      refreshConfirmDesc:
+        "Are you sure you want to re-init this server? (it's safe operation, no danger)",
+      refreshConfirm: "Confirm",
       detail: {
         back: "Back to Servers",
         title: "Server Detail",
@@ -643,9 +701,13 @@ export default {
       searchPlaceholder: "Filter by name...",
       colId: "ID",
       colName: "Name",
+      colIp: "IP",
       colServerCount: "Servers",
       colVersion: "Version",
       colActions: "Actions",
+      sortEdit: "Reorder",
+      sortSave: "Save order",
+      sortSaved: "Order saved",
       noAgents: "No agent nodes",
       batchUpgrade: "Batch Upgrade",
       batchMove: "Batch Move",
@@ -694,6 +756,8 @@ export default {
       edit: "Edit Job",
       name: "Name",
       type: "Task Type",
+      selectAll: "Select All",
+      deselectAll: "Deselect All",
       expression: "Cron Expression",
       expressionHint:
         "Spaces are normalized automatically. Compact input like 2***** becomes 2 * * * * *.",
@@ -974,9 +1038,11 @@ export default {
     token: "Token",
     tokenImport: "Import Token",
     kv: "KV",
+    staticBucket: "Static Buckets",
     jsRuntime: "JS Worker",
     jsRuntimeDetail: "Worker Detail",
     appPanel: "App Panel",
+    themeManagement: "Theme Management",
     appEntrance: "App Entrance",
     files: "Files",
     docker: "Docker",

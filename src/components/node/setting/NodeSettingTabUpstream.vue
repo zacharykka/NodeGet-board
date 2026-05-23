@@ -24,9 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useI18n } from "vue-i18n";
-import { useBackendStore } from "@/composables/useBackendStore";
 import { useBackendExtra } from "@/composables/useBackendExtra";
 import { getWsConnection } from "@/composables/useWsConnection";
+import { useLifecycle } from "@/composables/useLifecycle";
 import { useThemeStore } from "@/stores/theme";
 import {
   PackageOpen,
@@ -43,13 +43,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import UpstreamFormDialog from "@/components/node/setting/UpstreamDetailDialog.vue";
+import { TASK_NAME_LIST } from "@/types/task";
 
 const props = defineProps<{ uuid: string }>();
 
-const { currentBackendInfo } = useBackendExtra();
+const { currentBackendInfo, serverInfo } = useBackendExtra();
 const agentConfig = ref<splitConfig | null>(null);
 const { t } = useI18n();
 const { getAgentConfigExtra, writeAgentConfig } = useAgentConfig();
+const { afterAgentCreate } = useLifecycle();
 
 async function refresh() {
   loading.value = true;
@@ -132,7 +134,10 @@ const handleSave = async (newUpstream: UpstreamServer) => {
       ...newUpstream,
     };
   } else {
-    server.push(newUpstream);
+    server.push({
+      allow_task_type: TASK_NAME_LIST.slice(0),
+      ...newUpstream,
+    });
   }
 
   const newAgentConfig: AgentConfig = {
@@ -147,6 +152,17 @@ const handleSave = async (newUpstream: UpstreamServer) => {
     editingUpstream.value = newUpstream;
 
     await delay(1500);
+
+    // todo: sync agent config in new server
+    // await afterAgentCreate(
+    //   props.uuid,
+    //   {
+    //     databaseLimit:{},
+    //     metadata:{},
+    //     cronList:[]
+    //   }
+    // )
+
     await refresh();
   } catch (e: unknown) {
     toast.error(e instanceof Error ? e.message : String(e));
@@ -306,6 +322,17 @@ const handleDelete = async (index: number) => {
             />
             <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
+        </div>
+      </div>
+      <!-- ignore_cert -->
+      <div class="flex items-start px-4 py-3 gap-4">
+        <span class="text-sm text-muted-foreground w-28 shrink-0 pt-0.5">
+          忽略TLS错误
+        </span>
+        <div class="flex items-start gap-1.5 min-w-0">
+          <span class="text-sm font-mono break-all">{{
+            upstream.ignore_cert ? "是" : "否"
+          }}</span>
         </div>
       </div>
       <!-- Operation -->

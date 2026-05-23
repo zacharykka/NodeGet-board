@@ -11,7 +11,10 @@ export const showOS = (server: any) => {
   const s = server?.system;
   if (!s?.system_name) return "Unknown OS";
   const name =
-    s.system_name.replace(/\s*GNU\/Linux\s*$/i, "").trim() || s.system_name;
+    s.system_name
+      .replace(/\s*GNU\/Linux\s*$/i, "")
+      .replace(/\s*Alpine Linux\s*$/i, "Alpine")
+      .trim() || s.system_name;
   const version = (
     s.system_version ??
     s.system_os_version ??
@@ -96,6 +99,7 @@ export const isOnline = (server: any, now = Date.now()) => {
 };
 
 const DISTROS: { file: string; match: string[] }[] = [
+  { file: "alpinelinux-icon.svg", match: ["alpine"] },
   { file: "archlinux.svg", match: ["arch"] },
   { file: "manjaro.svg", match: ["manjaro"] },
   { file: "kali.svg", match: ["kali"] },
