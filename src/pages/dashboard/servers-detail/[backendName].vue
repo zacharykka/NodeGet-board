@@ -114,10 +114,12 @@ const storageLoading = ref(false);
 const fetchStorage = async () => {
   if (!backend.value) return;
   storageLoading.value = true;
+  const timeout = 30 * 1000; // 20 seconds
   try {
     storageData.value = await getWsConnection(backend.value.url).call(
       "nodeget-server_database_storage",
       { token: backend.value.token },
+      timeout,
     );
   } finally {
     storageLoading.value = false;
